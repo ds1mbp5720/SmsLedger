@@ -3,6 +3,7 @@ package com.example.smsledger
 import android.app.Application
 import androidx.room.Room
 import com.example.smsledger.data.local.AppDatabase
+import com.example.smsledger.data.repository.CategoryRepositoryImpl
 import com.example.smsledger.data.repository.ParsingRuleRepositoryImpl
 import com.example.smsledger.data.repository.TransactionRepositoryImpl
 import com.example.smsledger.domain.model.Category
@@ -35,7 +36,7 @@ class SmsLedgerApp : Application() {
     override fun onCreate() {
         super.onCreate()
         
-        database = Room.databaseOf(this, AppDatabase::class.java, "sms_ledger.db").build()
+        database = Room.databaseBuilder(this, AppDatabase::class.java, "sms_ledger.db").build()
         repository = TransactionRepositoryImpl(database.transactionDao())
         
         getTransactionsUseCase = GetTransactionsUseCase(repository)

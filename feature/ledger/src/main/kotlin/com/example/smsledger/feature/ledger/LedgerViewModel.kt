@@ -22,7 +22,8 @@ data class LedgerState(
     val selectedMonth: Int = Calendar.getInstance().get(Calendar.MONTH),
     val selectedYear: Int = Calendar.getInstance().get(Calendar.YEAR),
     val parsingRules: List<ParsingRule> = emptyList(),
-    val categories: List<Category> = emptyList()
+    val categories: List<Category> = emptyList(),
+    val searchQuery: String = ""
 )
 
 sealed class LedgerIntent {
@@ -38,6 +39,7 @@ sealed class LedgerIntent {
     data class AddCategory(val name: String) : LedgerIntent()
     data class UpdateCategoryName(val category: Category, val newName: String) : LedgerIntent()
     data class DeleteCategory(val category: Category, val moveTransactions: Boolean = true) : LedgerIntent()
+    data class Search(val query: String) : LedgerIntent()
 }
 
 class LedgerViewModel(
@@ -85,6 +87,10 @@ class LedgerViewModel(
             is LedgerIntent.AddCategory -> viewModelScope.launch { addCategoryUseCase(Category(name = intent.name)) }
             is LedgerIntent.UpdateCategoryName -> updateCategoryName(intent.category, intent.newName)
             is LedgerIntent.DeleteCategory -> deleteCategory(intent.category, intent.moveTransactions)
+            is LedgerIntent.Search -> {
+                _state.update { it.copy(searchQuery = intent.query) }
+                observeTransactions()
+            }
         }
     }
 
@@ -146,7 +152,9 @@ class LedgerViewModel(
                 
                 val filteredList = list.filter { 
                     val cal = Calendar.getInstance().apply { timeInMillis = it.date }
-                    cal.get(Calendar.MONTH) == month && cal.get(Calendar.YEAR) == year
+                    val matchesMonth = cal.get(Calendar.MONTH) == month && cal.get(Calendar.YEAR) == year
+                    val matchesSearch = it.storeName.contains(_state.value.searchQuery, ignoreCase = true)
+                    matchesMonth && matchesSearch
                 }
 
                 val income = filteredList.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }

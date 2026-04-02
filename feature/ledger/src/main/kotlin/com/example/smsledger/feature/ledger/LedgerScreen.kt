@@ -116,6 +116,24 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
 fun TransactionListView(state: LedgerState, viewModel: LedgerViewModel) {
     val numberFormat = NumberFormat.getCurrencyInstance(Locale.KOREA)
     Column {
+        // Search Bar
+        OutlinedTextField(
+            value = state.searchQuery,
+            onValueChange = { viewModel.handleIntent(LedgerIntent.Search(it)) },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            placeholder = { Text("상점명 검색") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            trailingIcon = {
+                if (state.searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { viewModel.handleIntent(LedgerIntent.Search("")) }) {
+                        Icon(Icons.Default.Clear, contentDescription = "지우기")
+                    }
+                }
+            },
+            singleLine = true,
+            shape = MaterialTheme.shapes.medium
+        )
+
         // Summary Card
         Card(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -178,7 +196,8 @@ fun StatisticsView(state: LedgerState) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(category, fontWeight = FontWeight.SemiBold)
+                        val truncatedCategory = if (category.length > 8) category.substring(0, 8) + ".." else category
+                        Text(truncatedCategory, fontWeight = FontWeight.SemiBold)
                         Text(numberFormat.format(amount), fontWeight = FontWeight.Bold)
                     }
                     val progress = amount.toFloat() / state.totalAmount.coerceAtLeast(1).toFloat()
@@ -235,7 +254,10 @@ fun SettingsView(state: LedgerState, viewModel: LedgerViewModel) {
                             editingCategory = category
                             showAddCategoryDialog = true
                         },
-                        label = { Text(category.name) },
+                        label = { 
+                            val truncatedName = if (category.name.length > 4) category.name.substring(0, 4) + ".." else category.name
+                            Text(truncatedName) 
+                        },
                         trailingIcon = {
                             Icon(
                                 Icons.Default.Close,
@@ -519,8 +541,9 @@ fun TransactionItem(
                         shape = MaterialTheme.shapes.small,
                         modifier = Modifier.padding(top = 4.dp)
                     ) {
+                        val truncatedCategory = if (transaction.category.length > 4) transaction.category.substring(0, 4) + ".." else transaction.category
                         Text(
-                            transaction.category, 
+                            truncatedCategory, 
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -596,6 +619,33 @@ fun AddTransactionDialog(
         title = { Text("내역 추가") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // AI/OCR Buttons Placeholder
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = { /* AI Smart Recognition logic */ },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer)
+                    ) {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("스마트 인식", fontSize = 12.sp)
+                    }
+                    Button(
+                        onClick = { /* OCR logic */ },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFF8E1), contentColor = Color(0xFF795548))
+                    ) {
+                        Icon(Icons.Default.TextFields, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("텍스트 추출", fontSize = 12.sp)
+                    }
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
                 // Type Toggle
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),

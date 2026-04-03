@@ -30,6 +30,12 @@ import androidx.compose.ui.platform.LocalContext
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import androidx.compose.animation.*
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.smsledger.domain.model.Category
 import com.example.smsledger.domain.model.ParsingRule
 import com.example.smsledger.domain.model.Transaction
@@ -45,10 +51,11 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
     var showAddDialog by remember { mutableStateOf(false) }
     var currentTab by remember { mutableStateOf(0) } // 0: List, 1: Stats, 2: Settings
 
-    Scaffold(
-        modifier = Modifier.systemBarsPadding(),
-        containerColor = Color(0xFFF8FAFC),
-        topBar = {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.systemBarsPadding(),
+            containerColor = Color(0xFFF8FAFC),
+            topBar = {
             Surface(
                 color = Color.White,
                 shadowElevation = 0.dp,
@@ -142,8 +149,12 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
         }
     }
 
-    if (showAddDialog) {
-        AddTransactionDialog(
+    AnimatedVisibility(
+        visible = showAddDialog,
+        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+    ) {
+        AddTransactionScreen(
             state = state,
             ledgerViewModel = viewModel,
             onDismiss = { showAddDialog = false },
@@ -821,7 +832,7 @@ fun TransactionItem(
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun AddTransactionDialog(
+fun AddTransactionScreen(
     state: LedgerState,
     ledgerViewModel: LedgerViewModel,
     onDismiss: () -> Unit, 
@@ -844,9 +855,9 @@ fun AddTransactionDialog(
     ) { uri: Uri? ->
         uri?.let { 
             isAiLoading = true
-            ledgerViewModel.processImage(context, it, isOcr = isOcrMode) { result: com.example.smsledger.feature.ledger.AiTransactionResult? ->
+            ledgerViewModel.processImage(context, it, isOcr = isOcrMode) { result ->
                 isAiLoading = false
-                result?.let { res: com.example.smsledger.feature.ledger.AiTransactionResult ->
+                result?.let { res ->
                     amount = res.amount.toString()
                     store = res.storeName
                     category = res.category
@@ -861,9 +872,9 @@ fun AddTransactionDialog(
     ) { bitmap: Bitmap? ->
         bitmap?.let {
             isAiLoading = true
-            ledgerViewModel.processBitmap(it, isOcr = isOcrMode) { result: com.example.smsledger.feature.ledger.AiTransactionResult? ->
+            ledgerViewModel.processBitmap(it, isOcr = isOcrMode) { result ->
                 isAiLoading = false
-                result?.let { res: com.example.smsledger.feature.ledger.AiTransactionResult ->
+                result?.let { res ->
                     amount = res.amount.toString()
                     store = res.storeName
                     category = res.category
@@ -892,102 +903,117 @@ fun AddTransactionDialog(
         }
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-        modifier = Modifier.padding(24.dp).fillMaxWidth(),
-        content = {
-            Surface(
-                shape = RoundedCornerShape(32.dp),
-                color = Color.White,
-                modifier = Modifier.fillMaxWidth()
+    // Full Screen Overlay (Web Preview Style)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f))
+            .clickable { onDismiss() },
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        // Content Panel (Web Preview Style: rounded-t-[32px])
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = false) { } // Prevent click through
+                .graphicsLayer {
+                    translationY = 0f
+                },
+            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+            color = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .navigationBarsPadding()
             ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text(
-                        "내역 추가",
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Black,
-                            fontSize = 22.sp
-                        ),
-                        color = Color(0xFF1E293B)
-                    )
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    // Top AI Buttons (Web Preview Style)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                // Bottom Sheet Handle
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(40.dp)
+                        .height(4.dp)
+                        .background(Color(0xFFE2E8F0), RoundedCornerShape(2.dp))
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                Text(
+                    "내역 추가", 
+                    style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.ExtraBold),
+                    color = Color(0xFF1E293B)
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // AI Buttons (Web Preview Style)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Smart Recognition
+                    Surface(
+                        onClick = { 
+                            isOcrMode = false
+                            handleCameraAction() 
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFEFF6FF),
+                        border = BorderStroke(1.dp, Color(0xFFDBEAFE))
                     ) {
-                        Surface(
-                            onClick = { 
-                                isOcrMode = false
-                                handleCameraAction() 
-                            },
-                            modifier = Modifier.weight(1f).height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color(0xFFEFF6FF),
-                            border = BorderStroke(1.dp, Color(0xFFDBEAFE))
+                        Row(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = if (isAiLoading) Icons.Default.Refresh else Icons.Default.AutoAwesome,
-                                    contentDescription = null,
-                                    tint = Color(0xFF2563EB),
-                                    modifier = Modifier.size(18.dp)
-                                )
+                            if (isAiLoading && !isOcrMode) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = Color(0xFF2563EB))
+                            } else {
+                                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF2563EB), modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    if (isAiLoading) "인식 중..." else "스마트 인식",
-                                    color = Color(0xFF2563EB),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp
-                                )
-                            }
-                        }
-                        Surface(
-                            onClick = { 
-                                isOcrMode = true
-                                galleryLauncher.launch("image/*") 
-                            },
-                            modifier = Modifier.weight(1f).height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color(0xFFFFFBEB),
-                            border = BorderStroke(1.dp, Color(0xFFFEF3C7))
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    Icons.Default.TextFields, 
-                                    contentDescription = null, 
-                                    tint = Color(0xFFD97706), 
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    "텍스트 추출", 
-                                    color = Color(0xFFD97706), 
-                                    fontWeight = FontWeight.Bold, 
-                                    fontSize = 13.sp
-                                )
+                                Text("스마트 인식", color = Color(0xFF2563EB), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                             }
                         }
                     }
                     
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    // Transaction Type Toggle (Web Preview Style)
-                    Row(
-                        modifier = Modifier.fillMaxWidth().height(44.dp).background(Color(0xFFF1F5F9), RoundedCornerShape(12.dp)).padding(4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    // Text Extraction
+                    Surface(
+                        onClick = { 
+                            isOcrMode = true
+                            galleryLauncher.launch("image/*") 
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFFFFBEB),
+                        border = BorderStroke(1.dp, Color(0xFFFEF3C7))
                     ) {
+                        Row(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (isAiLoading && isOcrMode) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = Color(0xFFD97706))
+                            } else {
+                                Icon(Icons.Default.TextFields, contentDescription = null, tint = Color(0xFFD97706), modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("텍스트 추출", color = Color(0xFFD97706), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Transaction Type Toggle (Web Preview Style: Chip Style)
+                Surface(
+                    modifier = Modifier.fillMaxWidth().height(44.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFF1F5F9)
+                ) {
+                    Row(modifier = Modifier.padding(4.dp)) {
                         Surface(
                             onClick = { type = TransactionType.EXPENSE },
                             modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -1019,131 +1045,131 @@ fun AddTransactionDialog(
                             }
                         }
                     }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    // Amount Field
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Amount Field
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    placeholder = { Text("금액", color = Color(0xFF94A3B8)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    textStyle = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = Color(0xFF1E293B)
+                    ),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF2563EB),
+                        unfocusedBorderColor = Color(0xFFE2E8F0)
+                    )
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Store Name Field
+                OutlinedTextField(
+                    value = store,
+                    onValueChange = { store = it },
+                    placeholder = { Text("상점명", color = Color(0xFF94A3B8)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF2563EB),
+                        unfocusedBorderColor = Color(0xFFE2E8F0)
+                    )
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Category Selection Field
+                Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
-                        value = amount,
-                        onValueChange = { amount = it },
-                        placeholder = { Text("금액", color = Color(0xFF94A3B8)) },
+                        value = category,
+                        onValueChange = { },
+                        readOnly = true,
+                        label = { Text("카테고리", fontSize = 10.sp) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        textStyle = TextStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = Color(0xFF1E293B)
-                        ),
+                        trailingIcon = {
+                            IconButton(onClick = { expanded = true }) {
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF64748B))
+                            }
+                        },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF2563EB),
                             unfocusedBorderColor = Color(0xFFE2E8F0)
                         )
                     )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    // Store Name Field
-                    OutlinedTextField(
-                        value = store,
-                        onValueChange = { store = it },
-                        placeholder = { Text("상점명", color = Color(0xFF94A3B8)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF2563EB),
-                            unfocusedBorderColor = Color(0xFFE2E8F0)
-                        )
-                    )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    // Category Selection Field
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
-                            value = category,
-                            onValueChange = { },
-                            readOnly = true,
-                            label = { Text("카테고리", fontSize = 10.sp) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            trailingIcon = {
-                                IconButton(onClick = { expanded = true }) {
-                                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF64748B))
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier.fillMaxWidth(0.8f)
+                    ) {
+                        state.categories.forEach { cat ->
+                            DropdownMenuItem(
+                                text = { Text(cat.name, fontWeight = FontWeight.Medium) },
+                                onClick = {
+                                    category = cat.name
+                                    expanded = false
+                                }
+                            )
+                        }
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        DropdownMenuItem(
+                            text = { 
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color(0xFF2563EB))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("새 카테고리 추가", color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
                                 }
                             },
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFF2563EB),
-                                unfocusedBorderColor = Color(0xFFE2E8F0)
-                            )
-                        )
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            modifier = Modifier.fillMaxWidth(0.8f)
-                        ) {
-                            state.categories.forEach { cat ->
-                                DropdownMenuItem(
-                                    text = { Text(cat.name, fontWeight = FontWeight.Medium) },
-                                    onClick = {
-                                        category = cat.name
-                                        expanded = false
-                                    }
-                                )
+                            onClick = {
+                                expanded = false
+                                showAddCategoryDialog = true
                             }
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                            DropdownMenuItem(
-                                text = { 
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color(0xFF2563EB))
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text("새 카테고리 추가", color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
-                                    }
-                                },
-                                onClick = {
-                                    expanded = false
-                                    showAddCategoryDialog = true
-                                }
-                            )
-                        }
+                        )
                     }
-                    
-                    Spacer(modifier = Modifier.height(32.dp))
-                    
-                    // Bottom Buttons (Web Preview Style)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                }
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                // Bottom Buttons (Web Preview Style)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        TextButton(
-                            onClick = onDismiss,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                "취소", 
-                                color = Color(0xFF64748B), 
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-                        }
-                        Button(
-                            onClick = { onConfirm(amount.toLongOrNull() ?: 0L, store, category, type) },
-                            modifier = Modifier.weight(1.5f).height(52.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-                        ) {
-                            Text(
-                                "추가", 
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-                        }
+                        Text(
+                            "취소", 
+                            color = Color(0xFF64748B), 
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                    }
+                    Button(
+                        onClick = { onConfirm(amount.toLongOrNull() ?: 0L, store, category, type) },
+                        modifier = Modifier.weight(1.5f).height(52.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                    ) {
+                        Text(
+                            "추가", 
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
                     }
                 }
             }
         }
-    )
+    }
 
     if (showAddCategoryDialog) {
         AddCategoryDialog(

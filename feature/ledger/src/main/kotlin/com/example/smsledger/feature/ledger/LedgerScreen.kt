@@ -2,6 +2,8 @@ package com.example.smsledger.feature.ledger
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -206,10 +209,12 @@ fun TransactionListView(state: LedgerState, viewModel: LedgerViewModel) {
                     modifier = Modifier.weight(1f),
                     textStyle = TextStyle(color = Color(0xFF1E293B), fontSize = 15.sp),
                     decorationBox = { innerTextField ->
-                        if (state.searchQuery.isEmpty()) {
-                            Text("내역 검색", color = Color(0xFF94A3B8), fontSize = 15.sp)
+                        Box(contentAlignment = Alignment.CenterStart) {
+                            if (state.searchQuery.isEmpty()) {
+                                Text("내역 검색", color = Color(0xFF94A3B8), fontSize = 15.sp)
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
                     },
                     singleLine = true
                 )

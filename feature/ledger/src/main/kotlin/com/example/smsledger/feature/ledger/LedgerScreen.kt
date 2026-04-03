@@ -161,41 +161,39 @@ fun TransactionListView(state: LedgerState, viewModel: LedgerViewModel) {
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Summary Section (Premium Card)
-        Surface(
+        // Summary Section (Web Design 1:1 Match)
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(4.dp, RoundedCornerShape(24.dp), ambientColor = Color(0xFF2563EB).copy(alpha = 0.05f)),
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFFF0F7FF).copy(alpha = 0.4f),
-            border = BorderStroke(1.dp, Color(0xFFEFF6FF))
+                .background(Color(0xFFEFF6FF).copy(alpha = 0.3f))
+                .padding(20.dp)
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Column {
-                        Text("수입", color = Color(0xFF94A3B8), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
-                        Text("+₩${String.format("%,d", state.totalIncome)}", color = Color(0xFF2563EB), fontWeight = FontWeight.Black, fontSize = 16.sp)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = Color.White,
+                shadowElevation = 2.dp,
+                border = BorderStroke(1.dp, Color(0xFFDBEAFE))
+            ) {
+                Column(modifier = Modifier.padding(20.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("수입", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8), letterSpacing = 1.sp)
+                        Text("+₩${String.format("%,d", state.totalIncome)}", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color(0xFF2563EB))
                     }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text("지출", color = Color(0xFF94A3B8), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
-                        Text("-₩${String.format("%,d", state.totalExpense)}", color = Color(0xFFEF4444), fontWeight = FontWeight.Black, fontSize = 16.sp)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("지출", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8), letterSpacing = 1.sp)
+                        Text("-₩${String.format("%,d", state.totalExpense)}", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
                     }
-                }
-                
-                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFF2563EB).copy(alpha = 0.05f))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("합계", color = Color(0xFF1E293B), fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    Text(
-                        text = "₩${String.format("%,d", state.totalAmount)}",
-                        color = if (state.totalAmount >= 0) Color(0xFF2563EB) else Color(0xFFEF4444),
-                        fontWeight = FontWeight.Black,
-                        fontSize = 20.sp
-                    )
+                    HorizontalDivider(color = Color(0xFFF8FAFC), thickness = 1.dp)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("합계", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                        Text(
+                            text = "₩${String.format("%,d", state.totalAmount)}",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (state.totalAmount >= 0) Color(0xFF2563EB) else Color(0xFFEF4444)
+                        )
+                    }
                 }
             }
         }
@@ -727,85 +725,85 @@ fun TransactionItem(
     var expanded by remember { mutableStateOf(false) }
     var showAddCategoryDialog by remember { mutableStateOf(false) }
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = Color.White
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp, horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                // Category Chip (Web Style - Top Placement)
-                Box {
-                    Surface(
-                        onClick = { expanded = true },
-                        color = Color(0xFFEFF6FF),
-                        shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    ) {
-                        val truncatedCategory = if (transaction.category.length > 4) transaction.category.substring(0, 4) + ".." else transaction.category
-                        Text(
-                            truncatedCategory,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold),
-                            color = Color(0xFF2563EB)
-                        )
-                    }
-                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                        categories.forEach { category ->
-                            DropdownMenuItem(
-                                text = { Text(category.name, fontSize = 13.sp) },
-                                onClick = {
-                                    onCategoryChange(category.name)
-                                    expanded = false
-                                }
-                            )
-                        }
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+        // Left Side: Info (Web Design 1:1 Match)
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            // Category Chip (Web Style)
+            Box {
+                Surface(
+                    onClick = { expanded = true },
+                    color = Color(0xFFEFF6FF),
+                    shape = RoundedCornerShape(6.dp),
+                    modifier = Modifier.wrapContentSize()
+                ) {
+                    val truncatedCategory = if (transaction.category.length > 4) transaction.category.substring(0, 4) + ".." else transaction.category
+                    Text(
+                        truncatedCategory,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                        color = Color(0xFF2563EB)
+                    )
+                }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    categories.forEach { category ->
                         DropdownMenuItem(
-                            text = { 
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFF2563EB))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("추가", fontSize = 13.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
-                                }
-                            },
+                            text = { Text(category.name, fontSize = 13.sp) },
                             onClick = {
+                                onCategoryChange(category.name)
                                 expanded = false
-                                showAddCategoryDialog = true
                             }
                         )
                     }
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    DropdownMenuItem(
+                        text = { 
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFF2563EB))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("추가", fontSize = 13.sp, color = Color(0xFF2563EB), fontWeight = FontWeight.Bold)
+                            }
+                        },
+                        onClick = {
+                            expanded = false
+                            showAddCategoryDialog = true
+                        }
+                    )
                 }
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    transaction.storeName,
-                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold),
-                    color = Color(0xFF1E293B)
-                )
-                Text(
-                    dateFormat.format(Date(transaction.date)),
-                    style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Medium),
-                    color = Color(0xFF94A3B8)
-                )
             }
             
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "${if (transaction.type == TransactionType.INCOME) "+" else "-"}${String.format("%,d", transaction.amount)}",
-                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Black),
-                    color = if (transaction.type == TransactionType.INCOME) Color(0xFF2563EB) else Color(0xFFEF4444)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = onDelete,
-                    modifier = Modifier.size(28.dp)
-                ) {
-                    Icon(Icons.Default.Delete, contentDescription = "삭제", tint = Color(0xFFE2E8F0), modifier = Modifier.size(16.dp))
-                }
+            // Store Name
+            Text(
+                transaction.storeName,
+                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold),
+                color = Color(0xFF1E293B)
+            )
+            
+            // Date
+            Text(
+                dateFormat.format(Date(transaction.date)),
+                style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Medium),
+                color = Color(0xFF94A3B8)
+            )
+        }
+        
+        // Right Side: Amount & Delete (Web Design 1:1 Match)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "${if (transaction.type == TransactionType.INCOME) "+" else "-"}${String.format("%,d", transaction.amount)}",
+                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Black),
+                color = if (transaction.type == TransactionType.INCOME) Color(0xFF2563EB) else Color(0xFFEF4444)
+            )
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(28.dp)
+            ) {
+                Icon(Icons.Default.Delete, contentDescription = "삭제", tint = Color(0xFFE2E8F0), modifier = Modifier.size(16.dp))
             }
         }
     }
@@ -1028,17 +1026,17 @@ fun AddTransactionDialog(
                     OutlinedTextField(
                         value = amount,
                         onValueChange = { amount = it },
-                        label = { Text("금액") },
+                        placeholder = { Text("금액", color = Color(0xFF94A3B8)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        textStyle = TextStyle(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = 18.sp,
+                            color = Color(0xFF1E293B)
                         ),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF2563EB),
-                            unfocusedBorderColor = Color(0xFFE2E8F0),
-                            focusedLabelColor = Color(0xFF2563EB)
+                            unfocusedBorderColor = Color(0xFFE2E8F0)
                         )
                     )
                     
@@ -1048,13 +1046,12 @@ fun AddTransactionDialog(
                     OutlinedTextField(
                         value = store,
                         onValueChange = { store = it },
-                        label = { Text("상점명") },
+                        placeholder = { Text("상점명", color = Color(0xFF94A3B8)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF2563EB),
-                            unfocusedBorderColor = Color(0xFFE2E8F0),
-                            focusedLabelColor = Color(0xFF2563EB)
+                            unfocusedBorderColor = Color(0xFFE2E8F0)
                         )
                     )
                     
@@ -1066,12 +1063,9 @@ fun AddTransactionDialog(
                             value = category,
                             onValueChange = { },
                             readOnly = true,
-                            label = { Text("카테고리") },
+                            label = { Text("카테고리", fontSize = 10.sp) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
                             trailingIcon = {
                                 IconButton(onClick = { expanded = true }) {
                                     Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF64748B))
@@ -1079,8 +1073,7 @@ fun AddTransactionDialog(
                             },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = Color(0xFF2563EB),
-                                unfocusedBorderColor = Color(0xFFE2E8F0),
-                                focusedLabelColor = Color(0xFF2563EB)
+                                unfocusedBorderColor = Color(0xFFE2E8F0)
                             )
                         )
                         DropdownMenu(
@@ -1116,7 +1109,7 @@ fun AddTransactionDialog(
                     
                     Spacer(modifier = Modifier.height(32.dp))
                     
-                    // Bottom Buttons
+                    // Bottom Buttons (Web Preview Style)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -1124,7 +1117,7 @@ fun AddTransactionDialog(
                     ) {
                         TextButton(
                             onClick = onDismiss,
-                            modifier = Modifier.weight(1f).height(56.dp)
+                            modifier = Modifier.weight(1f)
                         ) {
                             Text(
                                 "취소", 
@@ -1135,7 +1128,7 @@ fun AddTransactionDialog(
                         }
                         Button(
                             onClick = { onConfirm(amount.toLongOrNull() ?: 0L, store, category, type) },
-                            modifier = Modifier.weight(1f).height(56.dp),
+                            modifier = Modifier.weight(1.5f).height(52.dp),
                             shape = RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)

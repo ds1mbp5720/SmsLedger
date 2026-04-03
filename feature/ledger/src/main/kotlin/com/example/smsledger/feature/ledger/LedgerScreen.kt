@@ -2,11 +2,14 @@ package com.example.smsledger.feature.ledger
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.layout.ExperimentalLayoutApi
+import androidx.compose.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -241,6 +244,7 @@ fun StatisticsView(state: LedgerState) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsView(state: LedgerState, viewModel: LedgerViewModel) {
     var showAddRuleDialog by remember { mutableStateOf(false) }
@@ -507,6 +511,7 @@ fun ParsingRuleItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddParsingRuleDialog(
     rule: ParsingRule?,
@@ -644,6 +649,7 @@ fun TransactionItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionDialog(
     state: LedgerState,

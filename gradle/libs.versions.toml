@@ -40,6 +40,8 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "compose" }
+androidx-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "compose" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 google-ai-client-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version = "0.9.0" }
 

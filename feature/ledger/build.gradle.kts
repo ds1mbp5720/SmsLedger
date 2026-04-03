@@ -39,6 +39,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.foundation)
+    implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.activity.compose)
     implementation(libs.google.ai.client.generativeai)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")

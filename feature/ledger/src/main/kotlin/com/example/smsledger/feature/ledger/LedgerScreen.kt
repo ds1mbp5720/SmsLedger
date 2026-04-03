@@ -4,8 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.layout.ExperimentalLayoutApi
-import androidx.compose.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -139,6 +137,7 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
     if (showAddDialog) {
         AddTransactionDialog(
             state = state,
+            ledgerViewModel = viewModel,
             onDismiss = { showAddDialog = false },
             onConfirm = { amount, store, category, type ->
                 viewModel.handleIntent(LedgerIntent.Add(amount, store, category, type))
@@ -759,10 +758,11 @@ fun TransactionItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionDialog(
     state: LedgerState,
+    ledgerViewModel: LedgerViewModel,
     onDismiss: () -> Unit, 
     onConfirm: (Long, String, String, TransactionType) -> Unit,
     onAddCategory: (String) -> Unit
@@ -782,9 +782,9 @@ fun AddTransactionDialog(
     ) { uri: Uri? ->
         uri?.let { 
             isAiLoading = true
-            viewModel.processImage(context, it, isOcr = false) { result ->
+            ledgerViewModel.processImage(context, it, isOcr = false) { result: com.example.smsledger.feature.ledger.AiTransactionResult? ->
                 isAiLoading = false
-                result?.let { res ->
+                result?.let { res: com.example.smsledger.feature.ledger.AiTransactionResult ->
                     amount = res.amount.toString()
                     store = res.storeName
                     category = res.category
@@ -799,9 +799,9 @@ fun AddTransactionDialog(
     ) { bitmap: Bitmap? ->
         bitmap?.let {
             isAiLoading = true
-            viewModel.processBitmap(it, isOcr = false) { result ->
+            ledgerViewModel.processBitmap(it, isOcr = false) { result: com.example.smsledger.feature.ledger.AiTransactionResult? ->
                 isAiLoading = false
-                result?.let { res ->
+                result?.let { res: com.example.smsledger.feature.ledger.AiTransactionResult ->
                     amount = res.amount.toString()
                     store = res.storeName
                     category = res.category

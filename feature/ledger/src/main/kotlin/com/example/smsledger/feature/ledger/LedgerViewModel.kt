@@ -29,6 +29,11 @@ data class AiTransactionResult(
     val type: String
 )
 
+@Serializable
+data class OcrResult(
+    val text: String
+)
+
 data class LedgerState(
     val transactions: List<Transaction> = emptyList(),
     val isLoading: Boolean = false,
@@ -146,13 +151,18 @@ class LedgerViewModel(
                 }
 
                 val response = generativeModel.generateContent(inputContent)
-                val text = response.text ?: ""
+                val responseText = response.text ?: ""
                 
                 if (isOcr) {
-                    // Simple OCR result handling
-                    onResult(AiTransactionResult(storeName = text, amount = 0, category = "기타", type = "expense"))
+                    try {
+                        val ocrResult = Json.decodeFromString<OcrResult>(responseText)
+                        onResult(AiTransactionResult(storeName = ocrResult.text, amount = 0, category = "기타", type = "expense"))
+                    } catch (e: Exception) {
+                        // Fallback: if JSON parsing fails, use raw text
+                        onResult(AiTransactionResult(storeName = responseText, amount = 0, category = "기타", type = "expense"))
+                    }
                 } else {
-                    val result = Json.decodeFromString<AiTransactionResult>(text)
+                    val result = Json.decodeFromString<AiTransactionResult>(responseText)
                     onResult(result)
                 }
             } catch (e: Exception) {

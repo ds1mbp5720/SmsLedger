@@ -87,7 +87,7 @@ fun AddTransactionScreen(
     ) { uri: Uri? ->
         uri?.let { 
             isAiLoading = true
-            ledgerViewModel.processImage(context, it, isOcr = isOcrMode) { result ->
+            ledgerViewModel.processImage(context, it, isOcr = isOcrMode) { result, errorType ->
                 isAiLoading = false
                 if (result != null) {
                     ocrTextBlocks = result.allTextBlocks
@@ -101,10 +101,10 @@ fun AddTransactionScreen(
                         type = if (result.type == "income") TransactionType.INCOME else TransactionType.EXPENSE
                     }
                 } else {
-                    val message = if (state.geminiApiKey.isBlank()) {
-                        "Gemini API 키가 설정되지 않았습니다. 설정에서 키를 입력해주세요."
-                    } else {
-                        "인식에 실패했습니다. 다시 시도해주세요."
+                    val message = when (errorType) {
+                        "API_KEY_MISSING" -> "Gemini API 키가 설정되지 않았습니다. 설정에서 키를 입력해주세요."
+                        "QUOTA_EXCEEDED" -> "AI 사용량이 초과되었습니다. 잠시 후 다시 시도하거나 설정에서 API 키를 확인해주세요."
+                        else -> "인식에 실패했습니다. 다시 시도해주세요."
                     }
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
@@ -117,7 +117,7 @@ fun AddTransactionScreen(
     ) { bitmap: Bitmap? ->
         bitmap?.let {
             isAiLoading = true
-            ledgerViewModel.processBitmap(it, isOcr = isOcrMode) { result ->
+            ledgerViewModel.processBitmap(it, isOcr = isOcrMode) { result, errorType ->
                 isAiLoading = false
                 if (result != null) {
                     ocrTextBlocks = result.allTextBlocks
@@ -130,10 +130,10 @@ fun AddTransactionScreen(
                         type = if (result.type == "income") TransactionType.INCOME else TransactionType.EXPENSE
                     }
                 } else {
-                    val message = if (state.geminiApiKey.isBlank()) {
-                        "Gemini API 키가 설정되지 않았습니다. 설정에서 키를 입력해주세요."
-                    } else {
-                        "인식에 실패했습니다. 다시 시도해주세요."
+                    val message = when (errorType) {
+                        "API_KEY_MISSING" -> "Gemini API 키가 설정되지 않았습니다. 설정에서 키를 입력해주세요."
+                        "QUOTA_EXCEEDED" -> "AI 사용량이 초과되었습니다. 잠시 후 다시 시도하거나 설정에서 API 키를 확인해주세요."
+                        else -> "인식에 실패했습니다. 다시 시도해주세요."
                     }
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }

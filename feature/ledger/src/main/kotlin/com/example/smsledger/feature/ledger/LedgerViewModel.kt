@@ -177,19 +177,19 @@ class LedgerViewModel(
         }
     }
 
-    fun processImage(context: Context, uri: Uri, isOcr: Boolean, onResult: (AiTransactionResult?) -> Unit) {
+    fun processImage(context: Context, uri: Uri, isOcr: Boolean, onResult: (AiTransactionResult?, String?) -> Unit) {
         viewModelScope.launch {
             try {
                 val inputStream = context.contentResolver.openInputStream(uri)
                 val bitmap = BitmapFactory.decodeStream(inputStream)
                 processBitmap(bitmap, isOcr, onResult)
             } catch (e: Exception) {
-                onResult(null)
+                onResult(null, e.message)
             }
         }
     }
 
-    fun processBitmap(bitmap: Bitmap, isOcr: Boolean, onResult: (AiTransactionResult?) -> Unit) {
+    fun processBitmap(bitmap: Bitmap, isOcr: Boolean, onResult: (AiTransactionResult?, String?) -> Unit) {
         viewModelScope.launch {
             try {
                 val useSmartAi = _state.value.useSmartAi
@@ -205,7 +205,7 @@ class LedgerViewModel(
                         category = "기타", 
                         type = "expense",
                         allTextBlocks = textBlocks
-                    ))
+                    ), null)
                     return@launch
                 }
 
@@ -258,10 +258,15 @@ class LedgerViewModel(
                         }
                     }
                 }
-                onResult(result)
+                onResult(result, null)
             } catch (e: Exception) {
                 android.util.Log.e("LedgerViewModel", "AI Error: ${e.message}", e)
-                onResult(null)
+                val errorType = when {
+                    e.message?.contains("Quota exceeded") == true -> "QUOTA_EXCEEDED"
+                    e.message?.contains("API_KEY_MISSING") == true -> "API_KEY_MISSING"
+                    else -> "UNKNOWN_ERROR"
+                }
+                onResult(null, errorType)
             }
         }
     }

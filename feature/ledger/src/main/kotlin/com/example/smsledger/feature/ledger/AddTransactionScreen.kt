@@ -101,7 +101,12 @@ fun AddTransactionScreen(
                         type = if (result.type == "income") TransactionType.INCOME else TransactionType.EXPENSE
                     }
                 } else {
-                    Toast.makeText(context, "인식에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                    val message = if (state.geminiApiKey.isBlank()) {
+                        "Gemini API 키가 설정되지 않았습니다. 설정에서 키를 입력해주세요."
+                    } else {
+                        "인식에 실패했습니다. 다시 시도해주세요."
+                    }
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -125,7 +130,12 @@ fun AddTransactionScreen(
                         type = if (result.type == "income") TransactionType.INCOME else TransactionType.EXPENSE
                     }
                 } else {
-                    Toast.makeText(context, "인식에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                    val message = if (state.geminiApiKey.isBlank()) {
+                        "Gemini API 키가 설정되지 않았습니다. 설정에서 키를 입력해주세요."
+                    } else {
+                        "인식에 실패했습니다. 다시 시도해주세요."
+                    }
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
             }
         }

@@ -20,6 +20,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -28,12 +29,18 @@ import kotlin.coroutines.suspendCoroutine
 
 @Serializable
 data class AiTransactionResult(
-    val storeName: String,
-    val amount: Long,
-    val category: String,
-    val type: String,
+    val storeName: String = "",
+    val amount: Long = 0,
+    val category: String = "기타",
+    val type: String = "expense",
     val allTextBlocks: List<String> = emptyList()
 )
+
+private val json = Json {
+    ignoreUnknownKeys = true
+    coerceInputValues = true
+    isLenient = true
+}
 
 @Serializable
 data class OcrResult(
@@ -100,6 +107,11 @@ class LedgerViewModel(
         val apiKey = currentApiKey.ifBlank {
             System.getProperty("GEMINI_API_KEY") ?: System.getenv("GEMINI_API_KEY") ?: ""
         }
+        
+        if (apiKey.isBlank()) {
+            throw IllegalStateException("API_KEY_MISSING")
+        }
+
         return GenerativeModel(
             modelName = "gemini-3-flash-preview",
             apiKey = apiKey,
@@ -218,9 +230,19 @@ class LedgerViewModel(
                 val response = getGenerativeModel().generateContent(inputContent)
                 val responseText = response.text ?: ""
                 
-                val result = Json.decodeFromString<AiTransactionResult>(responseText)
+                // Clean markdown if present
+                val cleanedJson = if (responseText.contains("```json")) {
+                    responseText.substringAfter("```json").substringBeforeLast("```").trim()
+                } else if (responseText.contains("```")) {
+                    responseText.substringAfter("```").substringBeforeLast("```").trim()
+                } else {
+                    responseText.trim()
+                }
+                
+                val result = json.decodeFromString<AiTransactionResult>(cleanedJson)
                 onResult(result)
             } catch (e: Exception) {
+                android.util.Log.e("LedgerViewModel", "AI Error: ${e.message}", e)
                 onResult(null)
             }
         }

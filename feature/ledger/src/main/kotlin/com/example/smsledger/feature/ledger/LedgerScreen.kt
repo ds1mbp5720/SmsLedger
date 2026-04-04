@@ -121,7 +121,14 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
         ) { padding ->
             Column(modifier = Modifier.padding(padding).fillMaxSize()) {
                 when (currentTab) {
-                    0 -> TransactionListView(state, viewModel)
+                    0 -> TransactionListView(
+                        state = state, 
+                        viewModel = viewModel,
+                        onAddCategory = {
+                            editingCategoryForScreen = null
+                            showAddCategoryScreen = true
+                        }
+                    )
                     1 -> StatisticsView(state)
                     2 -> SettingsView(
                         state = state, 

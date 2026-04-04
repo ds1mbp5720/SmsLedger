@@ -172,6 +172,7 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
         ) {
             AddCategoryScreen(
                 category = editingCategoryForScreen,
+                existingCategories = state.categories,
                 onDismiss = { showAddCategoryScreen = false },
                 onConfirm = { name ->
                     if (editingCategoryForScreen == null) {

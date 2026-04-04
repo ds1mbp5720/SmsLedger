@@ -63,14 +63,28 @@ fun StatisticsView(state: LedgerState) {
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(12.dp))
-                                val progress = amount.toFloat() / state.totalAmount.coerceAtLeast(1).toFloat()
-                                LinearProgressIndicator(
-                                    progress = { progress },
-                                    modifier = Modifier.fillMaxWidth().height(8.dp),
-                                    color = Color(0xFF2563EB),
-                                    trackColor = Color(0xFFEFF6FF),
-                                    strokeCap = StrokeCap.Round
-                                )
+                                val progress = if (state.totalExpense > 0) amount.toFloat() / state.totalExpense.toFloat() else 0f
+                                val percentage = (progress * 100).toInt()
+                                
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    LinearProgressIndicator(
+                                        progress = { progress },
+                                        modifier = Modifier.weight(1f).height(8.dp),
+                                        color = Color(0xFF2563EB),
+                                        trackColor = Color(0xFFEFF6FF),
+                                        strokeCap = StrokeCap.Round
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        "$percentage%",
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = Color(0xFF64748B)
+                                    )
+                                }
                             }
                         }
                     }

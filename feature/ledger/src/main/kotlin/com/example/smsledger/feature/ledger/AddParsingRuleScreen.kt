@@ -157,21 +157,17 @@ fun AddParsingRuleScreen(
 fun ParsingField(label: String, value: String, onValueChange: (String) -> Unit, placeholder: String = "") {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(label, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8), letterSpacing = 0.5.sp)
-        BasicTextField(
+        OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
             textStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Medium, color = Color(0xFF1E293B)),
-            decorationBox = { innerTextField ->
-                Column {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        if (value.isEmpty()) Text(placeholder, color = Color(0xFFCBD5E1), fontSize = 18.sp)
-                        innerTextField()
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 2.dp)
-                }
-            }
+            placeholder = { Text(placeholder, color = Color(0xFFCBD5E1), fontSize = 18.sp) },
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFF2563EB),
+                unfocusedBorderColor = Color(0xFFF1F5F9)
+            )
         )
     }
 }

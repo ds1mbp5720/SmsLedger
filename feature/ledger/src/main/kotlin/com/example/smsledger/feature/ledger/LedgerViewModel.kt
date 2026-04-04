@@ -239,6 +239,9 @@ class LedgerViewModel(
 
                 val stats = filteredList.filter { it.type == TransactionType.EXPENSE }.groupBy { it.category }
                   .mapValues { entry -> entry.value.sumOf { it.amount } }
+                  .toList()
+                  .sortedByDescending { it.second }
+                  .toMap()
 
                 _state.update { it.copy(
                     transactions = list, // Keep all for the list view, or filter if desired

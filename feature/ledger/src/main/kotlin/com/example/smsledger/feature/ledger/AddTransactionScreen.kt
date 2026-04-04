@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import android.widget.Toast
 import com.example.smsledger.domain.model.TransactionType
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -110,14 +111,16 @@ fun AddTransactionScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            cameraLauncher.launch()
+            cameraLauncher.launch(null)
+        } else {
+            Toast.makeText(context, "카메라 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
     fun handleCameraAction() {
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) -> {
-                cameraLauncher.launch()
+                cameraLauncher.launch(null)
             }
             else -> {
                 permissionLauncher.launch(Manifest.permission.CAMERA)
@@ -341,48 +344,40 @@ fun AddTransactionScreen(
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                // Store Name Field (Web Style: Bottom Border)
+                // Store Name Field (Web Style: OutlinedTextField)
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text("상점명", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8), letterSpacing = 0.5.sp)
-                    BasicTextField(
+                    OutlinedTextField(
                         value = store,
                         onValueChange = { store = it },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                         textStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Medium, color = Color(0xFF1E293B)),
-                        decorationBox = { innerTextField ->
-                            Column {
-                                Box(modifier = Modifier.fillMaxWidth()) {
-                                    if (store.isEmpty()) Text("예: 스타벅스", color = Color(0xFFCBD5E1), fontSize = 18.sp)
-                                    innerTextField()
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 2.dp)
-                            }
-                        }
+                        placeholder = { Text("예: 스타벅스", color = Color(0xFFCBD5E1), fontSize = 18.sp) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF2563EB),
+                            unfocusedBorderColor = Color(0xFFF1F5F9)
+                        )
                     )
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Amount Field (Web Style: Bottom Border)
+                // Amount Field (Web Style: OutlinedTextField)
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text("금액", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8), letterSpacing = 0.5.sp)
-                    BasicTextField(
+                    OutlinedTextField(
                         value = amount,
                         onValueChange = { amount = it },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                         textStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B)),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        decorationBox = { innerTextField ->
-                            Column {
-                                Box(modifier = Modifier.fillMaxWidth()) {
-                                    if (amount.isEmpty()) Text("0", color = Color(0xFFCBD5E1), fontSize = 18.sp)
-                                    innerTextField()
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 2.dp)
-                            }
-                        }
+                        placeholder = { Text("0", color = Color(0xFFCBD5E1), fontSize = 18.sp) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF2563EB),
+                            unfocusedBorderColor = Color(0xFFF1F5F9)
+                        )
                     )
                 }
                 
@@ -449,24 +444,40 @@ fun AddTransactionScreen(
         }
     }
 
-    // OCR Preview Dialog
+    // OCR Preview Bottom Sheet
     if (showOcrPreview) {
-        Dialog(
-            onDismissRequest = { showOcrPreview = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f))
+                .clickable { showOcrPreview = false },
+            contentAlignment = Alignment.BottomCenter
         ) {
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .fillMaxHeight(0.8f),
-                shape = RoundedCornerShape(24.dp),
+                    .fillMaxWidth()
+                    .clickable(enabled = false) { }
+                    .graphicsLayer { translationY = 0f },
+                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
                 color = Color.White
             ) {
                 Column(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(24.dp)
-                        .fillMaxSize()
+                        .navigationBarsPadding()
                 ) {
+                    // Handle
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .width(40.dp)
+                            .height(4.dp)
+                            .background(Color(0xFFE2E8F0), RoundedCornerShape(2.dp))
+                    )
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -474,11 +485,16 @@ fun AddTransactionScreen(
                     ) {
                         Text(
                             "텍스트 추출 결과",
-                            style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                            style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.ExtraBold),
                             color = Color(0xFF1E293B)
                         )
                         IconButton(onClick = { showOcrPreview = false }) {
-                            Icon(Icons.Default.Add, contentDescription = "닫기", modifier = Modifier.rotate(45f), tint = Color(0xFF94A3B8))
+                            Icon(
+                                Icons.Default.Add, 
+                                contentDescription = "닫기", 
+                                modifier = Modifier.size(24.dp).rotate(45f),
+                                tint = Color(0xFF94A3B8)
+                            )
                         }
                     }
                     
@@ -486,16 +502,16 @@ fun AddTransactionScreen(
                     
                     Text(
                         "아래 텍스트를 길게 눌러 선택하고 복사할 수 있습니다.",
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         color = Color(0xFF64748B),
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
                     
                     Surface(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp),
+                        shape = RoundedCornerShape(16.dp),
                         color = Color(0xFFF8FAFC),
                         border = BorderStroke(1.dp, Color(0xFFE2E8F0))
                     ) {
@@ -504,8 +520,8 @@ fun AddTransactionScreen(
                                 Text(
                                     text = ocrResultText,
                                     style = TextStyle(
-                                        fontSize = 16.sp,
-                                        lineHeight = 24.sp,
+                                        fontSize = 15.sp,
+                                        lineHeight = 22.sp,
                                         color = Color(0xFF334155)
                                     )
                                 )
@@ -515,15 +531,39 @@ fun AddTransactionScreen(
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
-                    Button(
-                        onClick = { showOcrPreview = false },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text("확인", style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold))
+                        Button(
+                            onClick = { 
+                                val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.Context.CLIPBOARD_SERVICE as android.content.ClipboardManager
+                                val clip = android.content.ClipData.newPlainText("OCR Result", ocrResultText)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(context, "클립보드에 복사되었습니다.", Toast.LENGTH_SHORT).show()
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9)),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                        ) {
+                            Icon(Icons.Default.ContentCopy, contentDescription = null, tint = Color(0xFF64748B), modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("복사", color = Color(0xFF64748B), style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold))
+                        }
+
+                        Button(
+                            onClick = { showOcrPreview = false },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                        ) {
+                            Text("확인", style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold))
+                        }
                     }
                 }
             }

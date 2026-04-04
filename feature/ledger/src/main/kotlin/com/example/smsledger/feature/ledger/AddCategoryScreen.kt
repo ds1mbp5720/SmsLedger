@@ -22,10 +22,12 @@ import com.example.smsledger.domain.model.Category
 @Composable
 fun AddCategoryScreen(
     category: Category? = null,
+    existingCategories: List<Category>,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
     var name by remember { mutableStateOf(category?.name ?: "") }
+    var error by remember { mutableStateOf<String?>(null) }
 
     Box(
         modifier = Modifier
@@ -81,28 +83,45 @@ fun AddCategoryScreen(
                 
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text("카테고리 이름", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8), letterSpacing = 0.5.sp)
-                    BasicTextField(
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
                         value = name,
-                        onValueChange = { name = it },
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        onValueChange = { 
+                            name = it
+                            error = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
                         textStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Medium, color = Color(0xFF1E293B)),
-                        decorationBox = { innerTextField ->
-                            Column {
-                                Box(modifier = Modifier.fillMaxWidth()) {
-                                    if (name.isEmpty()) Text("예: 식비, 카페, 쇼핑...", color = Color(0xFFCBD5E1), fontSize = 18.sp)
-                                    innerTextField()
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 2.dp)
+                        placeholder = { Text("예: 식비, 카페, 쇼핑...", color = Color(0xFFCBD5E1), fontSize = 18.sp) },
+                        shape = RoundedCornerShape(12.dp),
+                        isError = error != null,
+                        supportingText = {
+                            if (error != null) {
+                                Text(error!!, color = MaterialTheme.colorScheme.error)
                             }
-                        }
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF2563EB),
+                            unfocusedBorderColor = Color(0xFFF1F5F9)
+                        )
                     )
                 }
                 
                 Spacer(modifier = Modifier.height(32.dp))
                 
                 Button(
-                    onClick = { onConfirm(name) },
+                    onClick = { 
+                        val trimmedName = name.trim()
+                        if (trimmedName.isEmpty()) {
+                            error = "이름을 입력해주세요."
+                            return@Button
+                        }
+                        if (existingCategories.any { it.name == trimmedName && it.id != category?.id }) {
+                            error = "이미 존재하는 카테고리입니다."
+                            return@Button
+                        }
+                        onConfirm(trimmedName) 
+                    },
                     modifier = Modifier.fillMaxWidth().height(64.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
@@ -118,6 +137,7 @@ fun AddCategoryScreen(
         }
     }
 }
+
 
 @Composable
 fun AddCategoryDialog(

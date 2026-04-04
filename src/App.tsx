@@ -100,7 +100,7 @@ export default function App() {
       }
     } catch (err) {
       console.error("Camera Error:", err);
-      alert("카메라를 열 수 없습니다. 권한을 확인해주세요.");
+      alert("카메라를 열 수 없습니다. 브라우저 설정에서 카메라 권한을 허용했는지 확인해주세요. (설정 > 사이트 설정 > 카메라)");
       setIsCameraOpen(false);
     }
   };

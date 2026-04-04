@@ -56,6 +56,7 @@ fun AddTransactionScreen(
     var type by remember { mutableStateOf(TransactionType.EXPENSE) }
     var isAiLoading by remember { mutableStateOf(false) }
     var isOcrMode by remember { mutableStateOf(false) }
+    var showSmartOptions by remember { mutableStateOf(false) }
     var ocrResultText by remember { mutableStateOf("") }
     var showOcrPreview by remember { mutableStateOf(false) }
     var showAddCategoryDialog by remember { mutableStateOf(false) }
@@ -208,102 +209,162 @@ fun AddTransactionScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 // AI Buttons (Web Preview Style: Vertical)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Smart Recognition (Camera)
-                    Surface(
-                        onClick = { 
-                            isOcrMode = false
-                            handleCameraAction() 
-                        },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFFEFF6FF),
-                        border = BorderStroke(2.dp, Color(0xFFDBEAFE))
+                if (showSmartOptions) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        // Smart (Camera)
+                        Surface(
+                            onClick = { 
+                                isOcrMode = false
+                                showSmartOptions = false
+                                handleCameraAction() 
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFFEFF6FF),
+                            border = BorderStroke(2.dp, Color(0xFFDBEAFE))
                         ) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color.White,
-                                shadowElevation = 2.dp
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Box(modifier = Modifier.padding(8.dp)) {
-                                    if (isAiLoading && !isOcrMode) {
-                                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp, color = Color(0xFF2563EB))
-                                    } else {
-                                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF2563EB), modifier = Modifier.size(24.dp))
-                                    }
-                                }
+                                Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color(0xFF2563EB), modifier = Modifier.size(24.dp))
+                                Text("카메라로 인식", color = Color(0xFF2563EB), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                             }
-                            Text("스마트 인식", color = Color(0xFF2563EB), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                         }
-                    }
-                    
-                    // Text Extraction (Camera)
-                    Surface(
-                        onClick = { 
-                            isOcrMode = true
-                            handleCameraAction() 
-                        },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFFFFFBEB),
-                        border = BorderStroke(2.dp, Color(0xFFFEF3C7))
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color.White,
-                                shadowElevation = 2.dp
-                            ) {
-                                Box(modifier = Modifier.padding(8.dp)) {
-                                    if (isAiLoading && isOcrMode) {
-                                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp, color = Color(0xFFD97706))
-                                    } else {
-                                        Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color(0xFFD97706), modifier = Modifier.size(24.dp))
-                                    }
-                                }
-                            }
-                            Text("카메라 OCR", color = Color(0xFFD97706), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                        }
-                    }
 
-                    // Text Extraction (Album)
-                    Surface(
-                        onClick = { 
-                            isOcrMode = true
-                            galleryLauncher.launch("image/*")
-                        },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFFF0FDF4),
-                        border = BorderStroke(2.dp, Color(0xFFDCFCE7))
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        // Smart (Album)
+                        Surface(
+                            onClick = { 
+                                isOcrMode = false
+                                showSmartOptions = false
+                                galleryLauncher.launch("image/*")
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFFEFF6FF),
+                            border = BorderStroke(2.dp, Color(0xFFDBEAFE))
                         ) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color.White,
-                                shadowElevation = 2.dp
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Box(modifier = Modifier.padding(8.dp)) {
-                                    Icon(Icons.Default.PhotoLibrary, contentDescription = null, tint = Color(0xFF16A34A), modifier = Modifier.size(24.dp))
-                                }
+                                Icon(Icons.Default.PhotoLibrary, contentDescription = null, tint = Color(0xFF2563EB), modifier = Modifier.size(24.dp))
+                                Text("앨범에서 선택", color = Color(0xFF2563EB), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                             }
-                            Text("앨범 OCR", color = Color(0xFF16A34A), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        }
+
+                        // Cancel
+                        Surface(
+                            onClick = { showSmartOptions = false },
+                            modifier = Modifier.weight(0.5f),
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFFF1F5F9)
+                        ) {
+                            Box(modifier = Modifier.fillMaxHeight().padding(8.dp), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.Close, contentDescription = null, tint = Color(0xFF64748B))
+                            }
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Smart Recognition (Toggle)
+                        Surface(
+                            onClick = { showSmartOptions = true },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFFEFF6FF),
+                            border = BorderStroke(2.dp, Color(0xFFDBEAFE))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color.White,
+                                    shadowElevation = 2.dp
+                                ) {
+                                    Box(modifier = Modifier.padding(8.dp)) {
+                                        if (isAiLoading && !isOcrMode) {
+                                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp, color = Color(0xFF2563EB))
+                                        } else {
+                                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF2563EB), modifier = Modifier.size(24.dp))
+                                        }
+                                    }
+                                }
+                                Text("스마트 인식", color = Color(0xFF2563EB), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            }
+                        }
+                        
+                        // Text Extraction (Camera)
+                        Surface(
+                            onClick = { 
+                                isOcrMode = true
+                                handleCameraAction() 
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFFFFFBEB),
+                            border = BorderStroke(2.dp, Color(0xFFFEF3C7))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color.White,
+                                    shadowElevation = 2.dp
+                                ) {
+                                    Box(modifier = Modifier.padding(8.dp)) {
+                                        if (isAiLoading && isOcrMode) {
+                                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp, color = Color(0xFFD97706))
+                                        } else {
+                                            Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color(0xFFD97706), modifier = Modifier.size(24.dp))
+                                        }
+                                    }
+                                }
+                                Text("카메라 OCR", color = Color(0xFFD97706), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            }
+                        }
+
+                        // Text Extraction (Album)
+                        Surface(
+                            onClick = { 
+                                isOcrMode = true
+                                galleryLauncher.launch("image/*")
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFFF0FDF4),
+                            border = BorderStroke(2.dp, Color(0xFFDCFCE7))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color.White,
+                                    shadowElevation = 2.dp
+                                ) {
+                                    Box(modifier = Modifier.padding(8.dp)) {
+                                        Icon(Icons.Default.PhotoLibrary, contentDescription = null, tint = Color(0xFF16A34A), modifier = Modifier.size(24.dp))
+                                    }
+                                }
+                                Text("앨범 OCR", color = Color(0xFF16A34A), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            }
                         }
                     }
                 }

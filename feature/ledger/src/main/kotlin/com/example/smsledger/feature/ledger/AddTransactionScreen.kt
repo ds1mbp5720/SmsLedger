@@ -212,7 +212,9 @@ fun AddTransactionScreen(
                                 if (state.useSmartAi) Color(0xFFEFF6FF) else Color(0xFFF1F5F9),
                                 RoundedCornerShape(12.dp)
                             )
-                            .clickable { ledgerViewModel.handleIntent(LedgerIntent.ToggleSmartAi(!state.useSmartAi)) }
+                            .clickable(enabled = !isAiLoading && selectionStep == SelectionStep.NONE) { 
+                                ledgerViewModel.handleIntent(LedgerIntent.ToggleSmartAi(!state.useSmartAi)) 
+                            }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Icon(
@@ -231,6 +233,7 @@ fun AddTransactionScreen(
                         Switch(
                             checked = state.useSmartAi,
                             onCheckedChange = { ledgerViewModel.handleIntent(LedgerIntent.ToggleSmartAi(it)) },
+                            enabled = !isAiLoading && selectionStep == SelectionStep.NONE,
                             modifier = Modifier.scale(0.6f),
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
@@ -241,7 +244,10 @@ fun AddTransactionScreen(
                         )
                     }
 
-                    IconButton(onClick = onDismiss) {
+                    IconButton(
+                        onClick = onDismiss,
+                        enabled = !isAiLoading && selectionStep == SelectionStep.NONE
+                    ) {
                         Icon(
                             Icons.Default.Add, 
                             contentDescription = "닫기", 
@@ -330,6 +336,7 @@ fun AddTransactionScreen(
                             isOcrMode = true
                             handleCameraAction() 
                         },
+                        enabled = !isAiLoading && selectionStep == SelectionStep.NONE,
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(16.dp),
                         color = if (state.useSmartAi) Color(0xFFEFF6FF) else Color(0xFFFFFBEB),
@@ -363,6 +370,7 @@ fun AddTransactionScreen(
                             isOcrMode = true
                             galleryLauncher.launch("image/*")
                         },
+                        enabled = !isAiLoading && selectionStep == SelectionStep.NONE,
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(16.dp),
                         color = if (state.useSmartAi) Color(0xFFEFF6FF) else Color(0xFFF0FDF4),
@@ -408,6 +416,7 @@ fun AddTransactionScreen(
                     Row(modifier = Modifier.padding(4.dp)) {
                         Surface(
                             onClick = { type = TransactionType.EXPENSE },
+                            enabled = !isAiLoading && selectionStep == SelectionStep.NONE,
                             modifier = Modifier.weight(1f).fillMaxHeight(),
                             shape = RoundedCornerShape(8.dp),
                             color = if (type == TransactionType.EXPENSE) Color.White else Color.Transparent,
@@ -424,6 +433,7 @@ fun AddTransactionScreen(
                         }
                         Surface(
                             onClick = { type = TransactionType.INCOME },
+                            enabled = !isAiLoading && selectionStep == SelectionStep.NONE,
                             modifier = Modifier.weight(1f).fillMaxHeight(),
                             shape = RoundedCornerShape(8.dp),
                             color = if (type == TransactionType.INCOME) Color.White else Color.Transparent,
@@ -449,6 +459,7 @@ fun AddTransactionScreen(
                     OutlinedTextField(
                         value = store,
                         onValueChange = { store = it },
+                        enabled = !isAiLoading && selectionStep == SelectionStep.NONE,
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                         textStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Medium, color = Color(0xFF1E293B)),
                         placeholder = { Text("예: 스타벅스", color = Color(0xFFCBD5E1), fontSize = 18.sp) },
@@ -468,6 +479,7 @@ fun AddTransactionScreen(
                     OutlinedTextField(
                         value = amount,
                         onValueChange = { amount = it },
+                        enabled = !isAiLoading && selectionStep == SelectionStep.NONE,
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                         textStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B)),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -494,6 +506,7 @@ fun AddTransactionScreen(
                         state.categories.forEach { cat ->
                             Surface(
                                 onClick = { category = cat.name },
+                                enabled = !isAiLoading && selectionStep == SelectionStep.NONE,
                                 shape = RoundedCornerShape(100.dp),
                                 color = if (category == cat.name) Color(0xFF2563EB) else Color(0xFFF1F5F9)
                             ) {
@@ -508,6 +521,7 @@ fun AddTransactionScreen(
                         }
                         Surface(
                             onClick = { showAddCategoryDialog = true },
+                            enabled = !isAiLoading && selectionStep == SelectionStep.NONE,
                             shape = RoundedCornerShape(100.dp),
                             color = Color(0xFFEFF6FF),
                             border = BorderStroke(1.dp, Color(0xFFDBEAFE))
@@ -528,9 +542,13 @@ fun AddTransactionScreen(
                 // Add Button (Web Style: Full Width)
                 Button(
                     onClick = { onConfirm(amount.toLongOrNull() ?: 0L, store, category, type) },
+                    enabled = !isAiLoading && selectionStep == SelectionStep.NONE && amount.isNotEmpty() && store.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth().height(64.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2563EB),
+                        disabledContainerColor = Color(0xFFCBD5E1)
+                    ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
                 ) {
                     Text(

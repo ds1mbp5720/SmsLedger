@@ -41,7 +41,11 @@ class MainActivity : ComponentActivity() {
                     app.getGeminiApiKeyUseCase,
                     app.saveGeminiApiKeyUseCase,
                     app.getUseSmartAiUseCase,
-                    app.setUseSmartAiUseCase
+                    app.setUseSmartAiUseCase,
+                    app.getRecurringTransactionsUseCase,
+                    app.addRecurringTransactionUseCase,
+                    app.updateRecurringTransactionUseCase,
+                    app.deleteRecurringTransactionUseCase
                 ) as T
             }
         }

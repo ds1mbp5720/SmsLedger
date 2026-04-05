@@ -38,6 +38,11 @@ class SmsLedgerApp : Application() {
     lateinit var getUseSmartAiUseCase: GetUseSmartAiUseCase
     lateinit var setUseSmartAiUseCase: SetUseSmartAiUseCase
 
+    lateinit var getRecurringTransactionsUseCase: GetRecurringTransactionsUseCase
+    lateinit var addRecurringTransactionUseCase: AddRecurringTransactionUseCase
+    lateinit var updateRecurringTransactionUseCase: UpdateRecurringTransactionUseCase
+    lateinit var deleteRecurringTransactionUseCase: DeleteRecurringTransactionUseCase
+
     override fun onCreate() {
         super.onCreate()
         
@@ -66,6 +71,12 @@ class SmsLedgerApp : Application() {
         saveGeminiApiKeyUseCase = SaveGeminiApiKeyUseCase(settingsRepository)
         getUseSmartAiUseCase = GetUseSmartAiUseCase(settingsRepository)
         setUseSmartAiUseCase = SetUseSmartAiUseCase(settingsRepository)
+
+        val recurringRepo = com.example.smsledger.data.repository.RecurringTransactionRepositoryImpl(database.recurringTransactionDao())
+        getRecurringTransactionsUseCase = GetRecurringTransactionsUseCase(recurringRepo)
+        addRecurringTransactionUseCase = AddRecurringTransactionUseCase(recurringRepo)
+        updateRecurringTransactionUseCase = UpdateRecurringTransactionUseCase(recurringRepo)
+        deleteRecurringTransactionUseCase = DeleteRecurringTransactionUseCase(recurringRepo)
 
         // Pre-populate default categories if empty
         CoroutineScope(Dispatchers.IO).launch {

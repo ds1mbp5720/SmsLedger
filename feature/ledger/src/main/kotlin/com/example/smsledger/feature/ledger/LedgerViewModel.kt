@@ -2,8 +2,7 @@ package com.example.smsledger.feature.ledger
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.smsledger.domain.model.Category
-import com.example.smsledger.domain.model.ParsingRule
+import com.example.smsledger.domain.model.RecurringTransaction
 import com.example.smsledger.domain.model.Transaction
 import com.example.smsledger.domain.model.TransactionType
 import com.example.smsledger.domain.usecase.*
@@ -67,7 +66,8 @@ data class LedgerState(
     val categories: List<Category> = emptyList(),
     val searchQuery: String = "",
     val geminiApiKey: String = "",
-    val useSmartAi: Boolean = true
+    val useSmartAi: Boolean = true,
+    val recurringTransactions: List<RecurringTransaction> = emptyList()
 )
 
 sealed class LedgerIntent {
@@ -86,6 +86,9 @@ sealed class LedgerIntent {
     data class Search(val query: String) : LedgerIntent()
     data class SaveApiKey(val key: String) : LedgerIntent()
     data class ToggleSmartAi(val use: Boolean) : LedgerIntent()
+    data class AddRecurringTransaction(val recurring: RecurringTransaction) : LedgerIntent()
+    data class UpdateRecurringTransaction(val recurring: RecurringTransaction) : LedgerIntent()
+    data class DeleteRecurringTransaction(val recurring: RecurringTransaction) : LedgerIntent()
 }
 
 class LedgerViewModel(
@@ -104,7 +107,11 @@ class LedgerViewModel(
     private val getGeminiApiKeyUseCase: GetGeminiApiKeyUseCase,
     private val saveGeminiApiKeyUseCase: SaveGeminiApiKeyUseCase,
     private val getUseSmartAiUseCase: GetUseSmartAiUseCase,
-    private val setUseSmartAiUseCase: SetUseSmartAiUseCase
+    private val setUseSmartAiUseCase: SetUseSmartAiUseCase,
+    private val getRecurringTransactionsUseCase: GetRecurringTransactionsUseCase,
+    private val addRecurringTransactionUseCase: AddRecurringTransactionUseCase,
+    private val updateRecurringTransactionUseCase: UpdateRecurringTransactionUseCase,
+    private val deleteRecurringTransactionUseCase: DeleteRecurringTransactionUseCase
 ) : ViewModel() {
 
     private var currentApiKey: String = ""
@@ -161,6 +168,7 @@ class LedgerViewModel(
                 observeTransactions()
                 observeParsingRules()
                 observeCategories()
+                observeRecurringTransactions()
             }
             is LedgerIntent.Add -> addManual(intent.amount, intent.store, intent.category, intent.type)
             is LedgerIntent.UpdateCategory -> updateCategory(intent.transaction, intent.newCategory)
@@ -180,6 +188,9 @@ class LedgerViewModel(
             }
             is LedgerIntent.SaveApiKey -> viewModelScope.launch { saveGeminiApiKeyUseCase(intent.key) }
             is LedgerIntent.ToggleSmartAi -> viewModelScope.launch { setUseSmartAiUseCase(intent.use) }
+            is LedgerIntent.AddRecurringTransaction -> viewModelScope.launch { addRecurringTransactionUseCase(intent.recurring) }
+            is LedgerIntent.UpdateRecurringTransaction -> viewModelScope.launch { updateRecurringTransactionUseCase(intent.recurring) }
+            is LedgerIntent.DeleteRecurringTransaction -> viewModelScope.launch { deleteRecurringTransactionUseCase(intent.recurring) }
         }
     }
 
@@ -373,6 +384,56 @@ class LedgerViewModel(
         viewModelScope.launch {
             getCategoriesUseCase().collect { list ->
                 _state.update { it.copy(categories = list) }
+            }
+        }
+    }
+
+    private fun observeRecurringTransactions() {
+        viewModelScope.launch {
+            getRecurringTransactionsUseCase().collect { list ->
+                _state.update { it.copy(recurringTransactions = list) }
+                processRecurringTransactions(list)
+            }
+        }
+    }
+
+    private fun processRecurringTransactions(recurring: List<RecurringTransaction>) {
+        viewModelScope.launch {
+            val allTransactions = getTransactionsUseCase().first()
+            val calendar = Calendar.getInstance()
+            val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
+            val currentMonth = calendar.get(Calendar.MONTH)
+            val currentYear = calendar.get(Calendar.YEAR)
+
+            recurring.forEach { rec ->
+                if (rec.dayOfMonth <= currentDay) {
+                    val alreadyAdded = allTransactions.any { t ->
+                        val tCal = Calendar.getInstance().apply { timeInMillis = t.date }
+                        t.recurringId == rec.id && 
+                        tCal.get(Calendar.MONTH) == currentMonth && 
+                        tCal.get(Calendar.YEAR) == currentYear
+                    }
+
+                    if (!alreadyAdded) {
+                        val transactionDate = Calendar.getInstance().apply {
+                            set(Calendar.DAY_OF_MONTH, rec.dayOfMonth)
+                            set(Calendar.HOUR_OF_DAY, 9)
+                            set(Calendar.MINUTE, 0)
+                            set(Calendar.SECOND, 0)
+                            set(Calendar.MILLISECOND, 0)
+                        }.timeInMillis
+
+                        addTransactionUseCase(Transaction(
+                            amount = rec.amount,
+                            storeName = rec.storeName,
+                            category = rec.category,
+                            type = rec.type,
+                            date = transactionDate,
+                            originalMessage = "고정 지출/수입 자동 추가",
+                            recurringId = rec.id
+                        ))
+                    }
+                }
             }
         }
     }

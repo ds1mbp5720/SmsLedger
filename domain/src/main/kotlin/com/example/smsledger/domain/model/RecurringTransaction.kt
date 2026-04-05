@@ -1,16 +1,10 @@
 package com.example.smsledger.domain.model
 
-data class Transaction(
+data class RecurringTransaction(
     val id: Long = 0,
     val amount: Long,
     val storeName: String,
-    val date: Long = System.currentTimeMillis(),
     val category: String = "기타",
-    val originalMessage: String = "",
     val type: TransactionType = TransactionType.EXPENSE,
-    val recurringId: Long? = null
+    val dayOfMonth: Int // 1-31
 )
-
-enum class TransactionType {
-    INCOME, EXPENSE
-}

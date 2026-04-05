@@ -107,7 +107,7 @@ fun AddParsingRuleScreen(
                 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+                Column(modifier = Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())) {
                     // Type Toggle
                     Surface(
                         modifier = Modifier.fillMaxWidth().height(48.dp),

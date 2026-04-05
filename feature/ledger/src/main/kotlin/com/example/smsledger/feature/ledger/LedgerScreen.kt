@@ -28,14 +28,17 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
     // State for Bottom Sheets
     var showAddCategoryScreen by remember { mutableStateOf(false) }
     var showAddRuleScreen by remember { mutableStateOf(false) }
+    var showAddRecurringScreen by remember { mutableStateOf(false) }
     var editingCategoryForScreen by remember { mutableStateOf<Category?>(null) }
     var editingRuleForScreen by remember { mutableStateOf<ParsingRule?>(null) }
+    var editingRecurringForScreen by remember { mutableStateOf<com.example.smsledger.domain.model.RecurringTransaction?>(null) }
 
     // Back button handling for bottom sheets
-    BackHandler(enabled = showAddDialog || showAddCategoryScreen || showAddRuleScreen) {
+    BackHandler(enabled = showAddDialog || showAddCategoryScreen || showAddRuleScreen || showAddRecurringScreen) {
         if (showAddDialog) showAddDialog = false
         else if (showAddCategoryScreen) showAddCategoryScreen = false
         else if (showAddRuleScreen) showAddRuleScreen = false
+        else if (showAddRecurringScreen) showAddRecurringScreen = false
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -68,6 +71,9 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
                                 }
                                 IconButton(onClick = { currentTab = 1 }) {
                                     Icon(Icons.Default.BarChart, contentDescription = null, tint = if(currentTab == 1) Color(0xFF2563EB) else Color(0xFF94A3B8))
+                                }
+                                IconButton(onClick = { currentTab = 3 }) {
+                                    Icon(Icons.Default.Repeat, contentDescription = null, tint = if(currentTab == 3) Color(0xFF2563EB) else Color(0xFF94A3B8))
                                 }
                                 IconButton(onClick = { currentTab = 2 }) {
                                     Icon(Icons.Default.Settings, contentDescription = null, tint = if(currentTab == 2) Color(0xFF2563EB) else Color(0xFF94A3B8))
@@ -150,6 +156,20 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
                             showAddRuleScreen = true
                         }
                     )
+                    3 -> RecurringTransactionsView(
+                        state = state,
+                        onAddRecurring = {
+                            editingRecurringForScreen = null
+                            showAddRecurringScreen = true
+                        },
+                        onEditRecurring = { recurring ->
+                            editingRecurringForScreen = recurring
+                            showAddRecurringScreen = true
+                        },
+                        onDeleteRecurring = { recurring ->
+                            viewModel.handleIntent(LedgerIntent.DeleteRecurringTransaction(recurring))
+                        }
+                    )
                 }
             }
         }
@@ -209,6 +229,26 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
                         viewModel.handleIntent(LedgerIntent.UpdateParsingRule(rule.copy(id = editingRuleForScreen!!.id)))
                     }
                     showAddRuleScreen = false
+                }
+            )
+        }
+
+        AnimatedVisibility(
+            visible = showAddRecurringScreen,
+            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+        ) {
+            AddRecurringTransactionScreen(
+                recurring = editingRecurringForScreen,
+                categories = state.categories,
+                onDismiss = { showAddRecurringScreen = false },
+                onConfirm = { recurring ->
+                    if (editingRecurringForScreen == null) {
+                        viewModel.handleIntent(LedgerIntent.AddRecurringTransaction(recurring))
+                    } else {
+                        viewModel.handleIntent(LedgerIntent.UpdateRecurringTransaction(recurring.copy(id = editingRecurringForScreen!!.id)))
+                    }
+                    showAddRecurringScreen = false
                 }
             )
         }

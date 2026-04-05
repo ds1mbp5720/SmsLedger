@@ -35,7 +35,8 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
         date = date,
         category = category,
         originalMessage = originalMessage,
-        type = TransactionType.valueOf(type)
+        type = TransactionType.valueOf(type),
+        recurringId = recurringId
     )
 
     private fun Transaction.toEntity() = TransactionEntity(
@@ -45,6 +46,7 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
         date = date,
         category = category,
         originalMessage = originalMessage,
-        type = type.name
+        type = type.name,
+        recurringId = recurringId
     )
 }

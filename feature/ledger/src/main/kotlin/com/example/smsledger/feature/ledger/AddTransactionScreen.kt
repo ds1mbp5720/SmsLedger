@@ -39,6 +39,7 @@ import android.content.Context
 import android.content.ClipboardManager
 import android.content.ClipData
 import android.widget.Toast
+import com.example.smsledger.domain.model.Transaction
 import com.example.smsledger.domain.model.TransactionType
 
 enum class SelectionStep {
@@ -52,15 +53,16 @@ enum class SelectionStep {
 fun AddTransactionScreen(
     state: LedgerState,
     ledgerViewModel: LedgerViewModel,
+    transaction: Transaction? = null,
     onDismiss: () -> Unit, 
     onConfirm: (Long, String, String, TransactionType) -> Unit,
     onAddCategory: (String) -> Unit
 ) {
     val context = LocalContext.current
-    var amount by remember { mutableStateOf("") }
-    var store by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf(state.categories.firstOrNull()?.name ?: "기타") }
-    var type by remember { mutableStateOf(TransactionType.EXPENSE) }
+    var amount by remember { mutableStateOf(transaction?.amount?.toString() ?: "") }
+    var store by remember { mutableStateOf(transaction?.storeName ?: "") }
+    var category by remember { mutableStateOf(transaction?.category ?: state.categories.firstOrNull()?.name ?: "기타") }
+    var type by remember { mutableStateOf(transaction?.type ?: TransactionType.EXPENSE) }
     var isAiLoading by remember { mutableStateOf(false) }
     var isOcrMode by remember { mutableStateOf(false) }
     var ocrTextBlocks by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -209,7 +211,7 @@ fun AddTransactionScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "내역 추가", 
+                        if (transaction == null) "내역 추가" else "내역 수정", 
                         style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.ExtraBold),
                         color = Color(0xFF1E293B)
                     )
@@ -562,7 +564,7 @@ fun AddTransactionScreen(
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
                 ) {
                     Text(
-                        "추가하기", 
+                        if (transaction == null) "추가하기" else "수정하기", 
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )

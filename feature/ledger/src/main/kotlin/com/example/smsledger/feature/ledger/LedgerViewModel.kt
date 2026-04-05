@@ -88,6 +88,7 @@ sealed class LedgerIntent {
     data class Search(val query: String) : LedgerIntent()
     data class SaveApiKey(val key: String) : LedgerIntent()
     data class ToggleSmartAi(val use: Boolean) : LedgerIntent()
+    data class UpdateTransaction(val transaction: Transaction) : LedgerIntent()
     data class AddRecurringTransaction(val recurring: RecurringTransaction) : LedgerIntent()
     data class UpdateRecurringTransaction(val recurring: RecurringTransaction) : LedgerIntent()
     data class DeleteRecurringTransaction(val recurring: RecurringTransaction) : LedgerIntent()
@@ -190,6 +191,7 @@ class LedgerViewModel(
             }
             is LedgerIntent.SaveApiKey -> viewModelScope.launch { saveGeminiApiKeyUseCase(intent.key) }
             is LedgerIntent.ToggleSmartAi -> viewModelScope.launch { setUseSmartAiUseCase(intent.use) }
+            is LedgerIntent.UpdateTransaction -> viewModelScope.launch { updateTransactionUseCase(intent.transaction) }
             is LedgerIntent.AddRecurringTransaction -> viewModelScope.launch { addRecurringTransactionUseCase(intent.recurring) }
             is LedgerIntent.UpdateRecurringTransaction -> viewModelScope.launch { updateRecurringTransactionUseCase(intent.recurring) }
             is LedgerIntent.DeleteRecurringTransaction -> viewModelScope.launch { deleteRecurringTransactionUseCase(intent.recurring) }

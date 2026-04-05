@@ -29,13 +29,17 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
     var showAddCategoryScreen by remember { mutableStateOf(false) }
     var showAddRuleScreen by remember { mutableStateOf(false) }
     var showAddRecurringScreen by remember { mutableStateOf(false) }
+    var editingTransactionForScreen by remember { mutableStateOf<com.example.smsledger.domain.model.Transaction?>(null) }
     var editingCategoryForScreen by remember { mutableStateOf<Category?>(null) }
     var editingRuleForScreen by remember { mutableStateOf<ParsingRule?>(null) }
     var editingRecurringForScreen by remember { mutableStateOf<com.example.smsledger.domain.model.RecurringTransaction?>(null) }
 
     // Back button handling for bottom sheets
     BackHandler(enabled = showAddDialog || showAddCategoryScreen || showAddRuleScreen || showAddRecurringScreen) {
-        if (showAddDialog) showAddDialog = false
+        if (showAddDialog) {
+            showAddDialog = false
+            editingTransactionForScreen = null
+        }
         else if (showAddCategoryScreen) showAddCategoryScreen = false
         else if (showAddRuleScreen) showAddRuleScreen = false
         else if (showAddRecurringScreen) showAddRecurringScreen = false
@@ -117,7 +121,10 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
             floatingActionButton = {
                 if (currentTab == 0) {
                     FloatingActionButton(
-                        onClick = { showAddDialog = true },
+                        onClick = { 
+                            editingTransactionForScreen = null
+                            showAddDialog = true 
+                        },
                         containerColor = Color(0xFF2563EB),
                         contentColor = Color.White,
                         shape = RoundedCornerShape(16.dp),
@@ -138,6 +145,10 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
                     0 -> TransactionListView(
                         state = state, 
                         viewModel = viewModel,
+                        onEdit = { transaction ->
+                            editingTransactionForScreen = transaction
+                            showAddDialog = true
+                        },
                         onAddCategory = {
                             editingCategoryForScreen = null
                             showAddCategoryScreen = true
@@ -182,10 +193,26 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
             AddTransactionScreen(
                 state = state,
                 ledgerViewModel = viewModel,
-                onDismiss = { showAddDialog = false },
+                transaction = editingTransactionForScreen,
+                onDismiss = { 
+                    showAddDialog = false 
+                    editingTransactionForScreen = null
+                },
                 onConfirm = { amount, store, category, type ->
-                    viewModel.handleIntent(LedgerIntent.Add(amount, store, category, type))
+                    if (editingTransactionForScreen == null) {
+                        viewModel.handleIntent(LedgerIntent.Add(amount, store, category, type))
+                    } else {
+                        viewModel.handleIntent(LedgerIntent.UpdateTransaction(
+                            editingTransactionForScreen!!.copy(
+                                amount = amount,
+                                storeName = store,
+                                category = category,
+                                type = type
+                            )
+                        ))
+                    }
                     showAddDialog = false
+                    editingTransactionForScreen = null
                 },
                 onAddCategory = { 
                     viewModel.handleIntent(LedgerIntent.AddCategory(it))

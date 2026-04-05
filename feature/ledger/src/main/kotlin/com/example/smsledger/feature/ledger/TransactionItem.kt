@@ -1,11 +1,13 @@
 package com.example.smsledger.feature.ledger
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +27,7 @@ fun TransactionItem(
     transaction: Transaction, 
     categories: List<Category>,
     onCategoryChange: (String) -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     onAddCategory: () -> Unit
 ) {
@@ -102,13 +105,19 @@ fun TransactionItem(
                 )
             }
             
-            // Right Side: Amount & Delete (Web Design 1:1 Match)
+            // Right Side: Amount, Edit & Delete (Web Design 1:1 Match)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "${if (transaction.type == TransactionType.INCOME) "+" else "-"}${transaction.amount.toKoreanCurrency()}",
                     style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Black),
                     color = if (transaction.type == TransactionType.INCOME) Color(0xFF2563EB) else Color(0xFFEF4444)
                 )
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.size(28.dp)
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = "수정", tint = Color(0xFFE2E8F0), modifier = Modifier.size(16.dp))
+                }
                 IconButton(
                     onClick = onDelete,
                     modifier = Modifier.size(28.dp)

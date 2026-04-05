@@ -22,7 +22,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TransactionListView(state: LedgerState, viewModel: LedgerViewModel, onAddCategory: () -> Unit) {
+fun TransactionListView(
+    state: LedgerState, 
+    viewModel: LedgerViewModel, 
+    onEdit: (Transaction) -> Unit,
+    onAddCategory: () -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 100.dp)
@@ -142,6 +147,7 @@ fun TransactionListView(state: LedgerState, viewModel: LedgerViewModel, onAddCat
                 onCategoryChange = { newCat -> 
                     viewModel.handleIntent(LedgerIntent.UpdateCategory(transaction, newCat))
                 },
+                onEdit = { onEdit(transaction) },
                 onDelete = { viewModel.handleIntent(LedgerIntent.Delete(transaction)) },
                 onAddCategory = onAddCategory
             )

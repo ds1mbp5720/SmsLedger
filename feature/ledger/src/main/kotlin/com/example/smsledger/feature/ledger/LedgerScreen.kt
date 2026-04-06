@@ -221,6 +221,9 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
                 },
                 onAddCategory = { 
                     viewModel.handleIntent(LedgerIntent.AddCategory(it))
+                },
+                onToggleSmartAi = {
+                    viewModel.handleIntent(LedgerIntent.ToggleSmartAi(it))
                 }
             )
         }

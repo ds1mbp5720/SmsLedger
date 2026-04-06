@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -39,6 +40,7 @@ import android.content.Context
 import android.content.ClipboardManager
 import android.content.ClipData
 import android.widget.Toast
+import com.example.smsledger.domain.model.Category
 import com.example.smsledger.domain.model.Transaction
 import com.example.smsledger.domain.model.TransactionType
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,7 +60,8 @@ fun AddTransactionScreen(
     transaction: Transaction? = null,
     onDismiss: () -> Unit, 
     onConfirm: (Long, String, String, TransactionType) -> Unit,
-    onAddCategory: (String) -> Unit
+    onAddCategory: (String) -> Unit,
+    onToggleSmartAi: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     var amount by remember { mutableStateOf(transaction?.amount?.toString() ?: "") }
@@ -227,7 +230,7 @@ fun AddTransactionScreen(
                                 RoundedCornerShape(12.dp)
                             )
                             .clickable(enabled = !isAiLoading && selectionStep == SelectionStep.NONE) { 
-                                ledgerViewModel.handleIntent(LedgerIntent.ToggleSmartAi(!state.useSmartAi)) 
+                                onToggleSmartAi(!state.useSmartAi) 
                             }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
@@ -246,7 +249,7 @@ fun AddTransactionScreen(
                         Spacer(modifier = Modifier.width(4.dp))
                         Switch(
                             checked = state.useSmartAi,
-                            onCheckedChange = { ledgerViewModel.handleIntent(LedgerIntent.ToggleSmartAi(it)) },
+                            onCheckedChange = { onToggleSmartAi(it) },
                             enabled = !isAiLoading && selectionStep == SelectionStep.NONE,
                             modifier = Modifier.scale(0.6f),
                             colors = SwitchDefaults.colors(
@@ -729,7 +732,8 @@ fun AddTransactionScreenPreview() {
             transaction = null,
             onDismiss = {},
             onConfirm = { _, _, _, _ -> },
-            onAddCategory = {}
+            onAddCategory = {},
+            onToggleSmartAi = {}
         )
     }
 }
@@ -752,7 +756,8 @@ fun EditTransactionScreenPreview() {
             ),
             onDismiss = {},
             onConfirm = { _, _, _, _ -> },
-            onAddCategory = {}
+            onAddCategory = {},
+            onToggleSmartAi = {}
         )
     }
 }

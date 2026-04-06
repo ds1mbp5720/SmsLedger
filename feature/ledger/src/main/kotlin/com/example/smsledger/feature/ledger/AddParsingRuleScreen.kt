@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.example.smsledger.domain.model.ParsingRule
 import com.example.smsledger.domain.model.TransactionType
 import java.util.regex.Pattern
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun AddParsingRuleScreen(

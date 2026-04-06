@@ -21,6 +21,8 @@ import com.example.smsledger.domain.model.Category
 import com.example.smsledger.domain.model.Transaction
 import com.example.smsledger.domain.model.TransactionType
 
+import androidx.compose.ui.tooling.preview.Preview
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionItem(
@@ -127,5 +129,25 @@ fun TransactionItem(
             }
         }
         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color(0xFFF8FAFC), thickness = 1.dp)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TransactionItemPreview() {
+    MaterialTheme {
+        TransactionItem(
+            transaction = Transaction(
+                amount = 12500,
+                storeName = "배달의민족",
+                category = "식비",
+                type = TransactionType.EXPENSE
+            ),
+            categories = listOf(Category(name = "식비"), Category(name = "교통비")),
+            onCategoryChange = {},
+            onEdit = {},
+            onDelete = {},
+            onAddCategory = {}
+        )
     }
 }

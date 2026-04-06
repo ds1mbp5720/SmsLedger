@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smsledger.domain.model.Category
 
+import androidx.compose.ui.tooling.preview.Preview
+
 @Composable
 fun AddCategoryScreen(
     category: Category? = null,
@@ -173,4 +175,28 @@ fun AddCategoryDialog(
             }
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddCategoryScreenPreview() {
+    MaterialTheme {
+        AddCategoryScreen(
+            category = null,
+            existingCategories = listOf(Category(name = "식비"), Category(name = "교통비")),
+            onDismiss = {},
+            onConfirm = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddCategoryDialogPreview() {
+    MaterialTheme {
+        AddCategoryDialog(
+            onDismiss = {},
+            onConfirm = {}
+        )
+    }
 }

@@ -23,6 +23,8 @@ import com.example.smsledger.domain.model.TransactionType
 import java.text.NumberFormat
 import java.util.*
 
+import androidx.compose.ui.tooling.preview.Preview
+
 @Composable
 fun RecurringTransactionsView(
     state: LedgerState,
@@ -126,5 +128,23 @@ fun RecurringItem(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RecurringTransactionsViewPreview() {
+    MaterialTheme {
+        RecurringTransactionsView(
+            state = LedgerState(
+                recurringTransactions = listOf(
+                    RecurringTransaction(amount = 10000, storeName = "넷플릭스", category = "구독", type = TransactionType.EXPENSE, dayOfMonth = 15),
+                    RecurringTransaction(amount = 2000000, storeName = "월급", category = "수입", type = TransactionType.INCOME, dayOfMonth = 25)
+                )
+            ),
+            onAddRecurring = {},
+            onEditRecurring = {},
+            onDeleteRecurring = {}
+        )
     }
 }

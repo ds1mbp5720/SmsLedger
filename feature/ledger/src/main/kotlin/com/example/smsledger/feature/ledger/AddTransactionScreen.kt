@@ -52,7 +52,8 @@ enum class SelectionStep {
 @Composable
 fun AddTransactionScreen(
     state: LedgerState,
-    ledgerViewModel: LedgerViewModel,
+    onProcessImage: (Context, Uri, Boolean, (AiTransactionResult?, String?) -> Unit) -> Unit,
+    onProcessBitmap: (Bitmap, Boolean, (AiTransactionResult?, String?) -> Unit) -> Unit,
     transaction: Transaction? = null,
     onDismiss: () -> Unit, 
     onConfirm: (Long, String, String, TransactionType) -> Unit,
@@ -89,7 +90,7 @@ fun AddTransactionScreen(
     ) { uri: Uri? ->
         uri?.let { 
             isAiLoading = true
-            ledgerViewModel.processImage(context, it, isOcr = isOcrMode) { result, errorType ->
+            onProcessImage(context, it, isOcrMode) { result, errorType ->
                 isAiLoading = false
                 if (result != null) {
                     ocrTextBlocks = result.allTextBlocks
@@ -119,7 +120,7 @@ fun AddTransactionScreen(
     ) { bitmap: Bitmap? ->
         bitmap?.let {
             isAiLoading = true
-            ledgerViewModel.processBitmap(it, isOcr = isOcrMode) { result, errorType ->
+            onProcessBitmap(it, isOcrMode) { result, errorType ->
                 isAiLoading = false
                 if (result != null) {
                     ocrTextBlocks = result.allTextBlocks
@@ -710,6 +711,47 @@ fun AddTransactionScreen(
                 onAddCategory(it)
                 category = it
             }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddTransactionScreenPreview() {
+    MaterialTheme {
+        AddTransactionScreen(
+            state = LedgerState(
+                categories = listOf(Category(name = "식비"), Category(name = "교통비"))
+            ),
+            onProcessImage = { _, _, _, _ -> },
+            onProcessBitmap = { _, _, _ -> },
+            transaction = null,
+            onDismiss = {},
+            onConfirm = { _, _, _, _ -> },
+            onAddCategory = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EditTransactionScreenPreview() {
+    MaterialTheme {
+        AddTransactionScreen(
+            state = LedgerState(
+                categories = listOf(Category(name = "식비"), Category(name = "교통비"))
+            ),
+            onProcessImage = { _, _, _, _ -> },
+            onProcessBitmap = { _, _, _ -> },
+            transaction = Transaction(
+                amount = 15000,
+                storeName = "스타벅스",
+                category = "식비",
+                type = TransactionType.EXPENSE
+            ),
+            onDismiss = {},
+            onConfirm = { _, _, _, _ -> },
+            onAddCategory = {}
         )
     }
 }

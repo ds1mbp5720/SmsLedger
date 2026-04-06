@@ -24,7 +24,9 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun TransactionListView(
     state: LedgerState, 
-    viewModel: LedgerViewModel, 
+    onSearch: (String) -> Unit,
+    onUpdateCategory: (Transaction, String) -> Unit,
+    onDelete: (Transaction) -> Unit,
     onEdit: (Transaction) -> Unit,
     onAddCategory: () -> Unit
 ) {
@@ -121,7 +123,7 @@ fun TransactionListView(
                         Spacer(modifier = Modifier.width(6.dp))
                         BasicTextField(
                             value = state.searchQuery,
-                            onValueChange = { viewModel.handleIntent(LedgerIntent.Search(it)) },
+                            onValueChange = { onSearch(it) },
                             modifier = Modifier.weight(1f),
                             textStyle = TextStyle(color = Color(0xFF1E293B), fontSize = 11.sp, fontWeight = FontWeight.Medium),
                             decorationBox = { innerTextField ->
@@ -145,13 +147,34 @@ fun TransactionListView(
                 transaction = transaction,
                 categories = state.categories,
                 onCategoryChange = { newCat -> 
-                    viewModel.handleIntent(LedgerIntent.UpdateCategory(transaction, newCat))
+                    onUpdateCategory(transaction, newCat)
                 },
                 onEdit = { onEdit(transaction) },
-                onDelete = { viewModel.handleIntent(LedgerIntent.Delete(transaction)) },
+                onDelete = { onDelete(transaction) },
                 onAddCategory = onAddCategory
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TransactionListViewPreview() {
+    MaterialTheme {
+        TransactionListView(
+            state = LedgerState(
+                transactions = listOf(
+                    Transaction(amount = 10000, storeName = "마트", category = "식비", type = TransactionType.EXPENSE),
+                    Transaction(amount = 50000, storeName = "월급", category = "수입", type = TransactionType.INCOME)
+                ),
+                categories = listOf(Category(name = "식비"), Category(name = "수입"))
+            ),
+            onSearch = {},
+            onUpdateCategory = { _, _ -> },
+            onDelete = {},
+            onEdit = {},
+            onAddCategory = {}
+        )
     }
 }
 

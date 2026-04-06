@@ -26,6 +26,8 @@ import com.example.smsledger.domain.model.Category
 import com.example.smsledger.domain.model.RecurringTransaction
 import com.example.smsledger.domain.model.TransactionType
 
+import androidx.compose.ui.tooling.preview.Preview
+
 @Composable
 fun AddRecurringTransactionScreen(
     recurring: RecurringTransaction?,
@@ -228,5 +230,18 @@ fun AddRecurringTransactionScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddRecurringTransactionScreenPreview() {
+    MaterialTheme {
+        AddRecurringTransactionScreen(
+            recurring = null,
+            categories = listOf(Category(name = "식비"), Category(name = "교통비")),
+            onDismiss = {},
+            onConfirm = {}
+        )
     }
 }

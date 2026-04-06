@@ -192,7 +192,12 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
         ) {
             AddTransactionScreen(
                 state = state,
-                ledgerViewModel = viewModel,
+                onProcessImage = { context, uri, isOcr, onResult ->
+                    viewModel.processImage(context, uri, isOcr, onResult)
+                },
+                onProcessBitmap = { bitmap, isOcr, onResult ->
+                    viewModel.processBitmap(bitmap, isOcr, onResult)
+                },
                 transaction = editingTransactionForScreen,
                 onDismiss = { 
                     showAddDialog = false 
@@ -247,7 +252,9 @@ fun LedgerScreen(viewModel: LedgerViewModel) {
         ) {
             AddParsingRuleScreen(
                 rule = editingRuleForScreen,
-                viewModel = viewModel,
+                onGenerateRegex = { sample, onResult ->
+                    viewModel.generateRegexFromSample(sample, onResult)
+                },
                 onDismiss = { showAddRuleScreen = false },
                 onConfirm = { rule ->
                     if (editingRuleForScreen == null) {

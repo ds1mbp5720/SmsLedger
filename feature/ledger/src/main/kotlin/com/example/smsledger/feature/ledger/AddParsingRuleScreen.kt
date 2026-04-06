@@ -32,7 +32,7 @@ import java.util.regex.Pattern
 @Composable
 fun AddParsingRuleScreen(
     rule: ParsingRule?,
-    viewModel: LedgerViewModel,
+    onGenerateRegex: (String, (RegexSuggestion?, String?) -> Unit) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: (ParsingRule) -> Unit
 ) {
@@ -174,7 +174,7 @@ fun AddParsingRuleScreen(
                                 return@Button
                             }
                             isGenerating = true
-                            viewModel.generateRegexFromSample(sampleText) { suggestion, error ->
+                            onGenerateRegex(sampleText) { suggestion, error ->
                                 isGenerating = false
                                 if (suggestion != null) {
                                     amountPattern = suggestion.amountPattern
@@ -362,6 +362,19 @@ fun ParsingField(label: String, value: String, onValueChange: (String) -> Unit, 
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun AddParsingRuleScreenPreview() {
+    MaterialTheme {
+        AddParsingRuleScreen(
+            rule = null,
+            onGenerateRegex = { _, _ -> },
+            onDismiss = {},
+            onConfirm = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddParsingRuleDialog(
@@ -414,4 +427,16 @@ fun AddParsingRuleDialog(
             TextButton(onClick = onDismiss) { Text("취소") }
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddParsingRuleDialogPreview() {
+    MaterialTheme {
+        AddParsingRuleDialog(
+            rule = null,
+            onDismiss = {},
+            onConfirm = {}
+        )
+    }
 }

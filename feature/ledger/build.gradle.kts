@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.activity.compose)
     implementation(libs.google.ai.client.generativeai)
+    implementation(libs.play.services.ads)
     implementation(libs.mlkit.text.recognition)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 }

@@ -32,11 +32,11 @@ fun StatisticsView(state: LedgerState) {
         Spacer(modifier = Modifier.height(24.dp))
         
         if (state.monthlyStats.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text("데이터가 없습니다.", color = Color(0xFF94A3B8))
             }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 state.monthlyStats.forEach { (category, amount) ->
                     item {
                         Surface(
@@ -91,5 +91,7 @@ fun StatisticsView(state: LedgerState) {
                 }
             }
         }
+        
+        AdMobBanner(modifier = Modifier.padding(top = 16.dp))
     }
 }

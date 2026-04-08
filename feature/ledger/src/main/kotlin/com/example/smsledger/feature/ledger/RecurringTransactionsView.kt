@@ -52,11 +52,11 @@ fun RecurringTransactionsView(
         )
 
         if (state.recurringTransactions.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text("등록된 고정 내역이 없습니다.", color = Color(0xFF94A3B8))
             }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(state.recurringTransactions) { recurring ->
                     RecurringItem(
                         recurring = recurring,
@@ -66,6 +66,8 @@ fun RecurringTransactionsView(
                 }
             }
         }
+
+        AdMobBanner(modifier = Modifier.padding(top = 16.dp))
     }
 }
 

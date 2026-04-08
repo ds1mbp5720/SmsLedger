@@ -18,6 +18,7 @@ import com.example.smsledger.feature.ledger.LedgerViewModel
 import com.example.smsledger.feature.ledger.LedgerScreen
 import com.example.smsledger.feature.ledger.LedgerIntent
 import com.example.smsledger.ui.theme.SmsLedgerTheme
+import com.google.android.gms.ads.MobileAds
 
 class MainActivity : ComponentActivity() {
     
@@ -63,6 +64,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        MobileAds.initialize(this) {}
         checkPermissions()
 
         setContent {

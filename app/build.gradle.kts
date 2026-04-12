@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.google.material)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.play.services.ads)
     
     // Room for database
     implementation(libs.androidx.room.runtime)
